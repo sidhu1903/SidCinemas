@@ -1,0 +1,118 @@
+body.dark {
+  background-color: #0d1117;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: radial-gradient(circle at top, #161b22, #0d1117);
+  color: #fff;
+}
+
+.card {
+  background: #161b22;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+  text-align: center;
+}
+
+.card input, .card button {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+}
+
+input {
+  background: #21262d;
+  color: #fff;
+}
+
+button {
+  background: #30363d;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button.accent {
+  background: #238636;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+/* Room Page */
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+}
+
+.player-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 65vh;
+}
+
+.player-box iframe {
+  width: 80%;
+  height: 100%;
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+  transition: transform 0.3s;
+}
+
+.player-box iframe:hover {
+  transform: scale(1.01);
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.controls select, .controls input {
+  padding: 8px;
+  margin: 5px;
+  border-radius: 6px;
+  background: #161b22;
+  color: white;
+  border: none;
+}
+
+.controls button {
+  padding: 8px 15px;
+  border-radius: 6px;
+  background: #238636;
+  border: none;
+  cursor: pointer;
+}
+
+.video-call {
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.video-call video {
+  width: 140px;
+  height: 110px;
+  border-radius: 10px;
+  background: black;
+  object-fit: cover;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+

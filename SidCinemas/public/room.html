@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Watch Room</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark">
+  <div class="header">
+    <span id="roomCodeBox">Room: <strong id="roomCode">---</strong></span>
+    <button id="leaveRoom">✖ Leave</button>
+  </div>
+
+  <div id="playerBox" class="player-box">
+    <p id="placeholder">🎬 Waiting for video...</p>
+  </div>
+
+  <div id="controls" class="controls">
+    <select id="videoType">
+      <option value="youtube">🎥 YouTube</option>
+      <option value="movie">🎬 Movie</option>
+    </select>
+    <input id="videoInput" placeholder="Enter YouTube link or TMDb ID" />
+    <button id="setVideo" class="accent">▶ Play</button>
+  </div>
+
+  <div id="videos" class="video-call">
+    <video id="localVideo" autoplay muted></video>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const params = new URLSearchParams(location.search);
+    const code = params.get("room");
+    const initType = params.get("type");
+    const initData = params.get("data");
+    document.getElementById("roomCode").innerText = code;
+    socket.emit("join-room", code);
+
+    const videoContainer = document.getElementById("videos");
+    const playerBox = document.getElementById("playerBox");
+    let localStream;
+    const peers = {};
+
+    // local video
+    navigator.mediaDevices.getUserMedia({ video:true, audio:true }).then(stream=>{
+      localStream = stream;
+      document.getElementById("localVideo").srcObject = stream;
+    });
+
+    // load video
+    function loadVideo(type, data) {
+      document.getElementById("placeholder").style.display="none";
+      if (type === "youtube") {
+        const id = data.split("v=")[1]?.split("&")[0] || data;
+        playerBox.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allowfullscreen></iframe>`;
+      } else {
+        playerBox.innerHTML = `<iframe src="https://vidsrc.to/embed/movie/${data}" allowfullscreen></iframe>`;
+      }
+    }
+
+    socket.on("video-set", (type,data)=>loadVideo(type,data));
+    if (initType && initData) loadVideo(initType, initData);
+
+    document.getElementById("setVideo").onclick = () => {
+      const type = document.getElementById("videoType").value;
+      const data = document.getElementById("videoInput").value.trim();
+      if (data) socket.emit("set-video", code, type, data);
+    };
+
+    // video call
+    socket.on("new-user", async (userId)=>{
+      const pc=createPeer(userId);
+      const offer=await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      socket.emit("offer",code,offer,userId);
+    });
+    socket.on("offer",async(offer,senderId)=>{
+      const pc=createPeer(senderId);
+      await pc.setRemoteDescription(offer);
+      const answer=await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      socket.emit("answer",code,answer,senderId);
+    });
+    socket.on("answer",async(answer,senderId)=>{
+      const pc=peers[senderId];
+      if(pc)await pc.setRemoteDescription(answer);
+    });
+    socket.on("candidate",(cand,senderId)=>{
+      const pc=peers[senderId];
+      if(pc)pc.addIceCandidate(new RTCIceCandidate(cand));
+    });
+
+    function createPeer(targetId){
+      const pc=new RTCPeerConnection();
+      peers[targetId]=pc;
+      localStream.getTracks().forEach(track=>pc.addTrack(track,localStream));
+      pc.onicecandidate=e=>{
+        if(e.candidate)socket.emit("candidate",code,e.candidate,targetId);
+      };
+      pc.ontrack=e=>{
+        if(!document.getElementById(targetId)){
+          const vid=document.createElement("video");
+          vid.id=targetId;
+          vid.autoplay=true;
+          vid.srcObject=e.streams[0];
+          videoContainer.appendChild(vid);
+        }
+      };
+      return pc;
+    }
+
+    document.getElementById("leaveRoom").onclick = () => {
+      window.location.href = "/";
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SidCinemas</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* SidCinemas Aesthetic Title */
+    .logo {
+      font-size: 3rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      animation: fadeIn 2s ease-in-out, glowPulse 3s ease-in-out infinite alternate;
+      font-family: 'Poppins', sans-serif;
+      margin-bottom: 50px;
+    }
+
+    /* Golden version */
+    .golden {
+      color: #ffd479;
+      text-shadow: 0 0 20px rgba(255, 210, 50, 0.5);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes glowPulse {
+      0% { text-shadow: 0 0 15px rgba(255, 210, 50, 0.3); }
+      100% { text-shadow: 0 0 30px rgba(255, 210, 50, 0.9); }
+    }
+
+    .subtext {
+      color: #bbb;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      margin-top: -40px;
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body class="center">
+  <div style="text-align:center;">
+    <!-- 👇 Your golden SidCinemas title -->
+    <div class="logo golden">SidCinemas</div>
+    <div class="subtext">Watch. Connect. Experience.</div>
+
+    <div class="card">
+      <input id="roomCode" placeholder="Enter Room Code" />
+      <button id="joinRoom">Join Room</button>
+      <p style="color:#aaa;">or</p>
+      <button id="createRoom" class="accent">Create Room</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    document.getElementById("createRoom").onclick = () => socket.emit("create-room");
+    document.getElementById("joinRoom").onclick = () => {
+      const code = document.getElementById("roomCode").value.trim().toUpperCase();
+      if (code) socket.emit("join-room", code);
+    };
+    socket.on("room-created", code => location.href=`/room.html?room=${code}`);
+    socket.on("room-joined", (code,type,data)=>location.href=`/room.html?room=${code}&type=${type||""}&data=${data||""}`);
+    socket.on("error", m => alert(m));
+  </script>
+</body>
+</html>
