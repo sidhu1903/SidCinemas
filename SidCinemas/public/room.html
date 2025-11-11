@@ -8,8 +8,16 @@ window.addEventListener("DOMContentLoaded", () => {
   const code = params.get("room");
   const initType = params.get("type");
   const initData = params.get("data");
-  document.getElementById("roomCode").innerText = code;
-  socket.emit("join-room", code);
+    // ✅ Wait until the #roomCode element actually exists before setting it
+  const waitForRoomCode = setInterval(() => {
+    const roomEl = document.getElementById("roomCode");
+    if (roomEl) {
+      clearInterval(waitForRoomCode);
+      roomEl.innerText = code;
+      socket.emit("join-room", code);
+    }
+  }, 100);
+
 
   const videoContainer = document.getElementById("videos");
   const playerBox = document.getElementById("playerBox");
@@ -195,3 +203,4 @@ window.addEventListener("DOMContentLoaded", () => {
 
 }); // END of DOMContentLoaded
 </script>
+
