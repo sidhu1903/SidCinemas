@@ -42,8 +42,21 @@
     }
   }
 
-  socket.on("video-set", (type,data)=>loadVideo(type,data));
+    // wait for the iframe to load fully before syncing
+  socket.on("video-set", (type, data) => {
+    loadVideo(type, data);
+
+    const iframe = document.querySelector("iframe");
+    if (iframe) {
+      iframe.addEventListener("load", () => {
+        if (type === "youtube") onYouTubeIframeAPIReady();
+        else setupVidSrcSync();
+      });
+    }
+  });
+
   if (initType && initData) loadVideo(initType, initData);
+
 
   document.getElementById("setVideo").onclick = () => {
     const type = document.getElementById("videoType").value;
@@ -179,3 +192,4 @@
     window.location.href = "/";
   };
 </script>
+
