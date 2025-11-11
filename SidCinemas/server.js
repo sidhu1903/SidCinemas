@@ -72,6 +72,22 @@ io.on("connection", (socket) => {
       console.log("Video set for room:", code);
     }
   });
+  // ---------- SYNC CONTROLS ----------
+socket.on("play-video", (code, time) => {
+  console.log(`Play event in room ${code} at time ${time}`);
+  socket.to(code).emit("play-video", time);
+});
+
+socket.on("pause-video", (code, time) => {
+  console.log(`Pause event in room ${code} at time ${time}`);
+  socket.to(code).emit("pause-video", time);
+});
+
+socket.on("seek-video", (code, time) => {
+  console.log(`Seek event in room ${code} at time ${time}`);
+  socket.to(code).emit("seek-video", time);
+});
+
 
   // WebRTC signaling
   socket.on("offer", (code, offer, toId) => io.to(toId).emit("offer", offer, socket.id));
@@ -85,3 +101,4 @@ io.on("connection", (socket) => {
 });
 
 server.listen(3000, () => console.log("🚀 SidCinemas server running on port 3000"));
+
